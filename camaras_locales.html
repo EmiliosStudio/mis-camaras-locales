@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Cámaras Locales</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 10px 0 20px 0;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .window {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .window-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: #334155;
+            color: white;
+        }
+
+        button:hover { background: #475569; }
+        button.active { background: var(--accent); color: var(--bg); }
+
+        #observar-btn {
+            width: 100%;
+            background: var(--accent);
+            color: var(--bg);
+            font-size: 1rem;
+            padding: 12px;
+            text-transform: uppercase;
+        }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        li {
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        li::before { content: ""; width: 6px; height: 6px; background: #22c55e; border-radius: 50%; }
+
+        /* VISTA DE CÁMARAS MEJORADA */
+        #visor-container {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 60px); /* Ajuste para que quepa en pantalla */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cam-grid {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 80vh; /* Limita la altura para evitar scroll */
+            margin-bottom: 15px;
+        }
+
+        .video-box {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #334155;
+            aspect-ratio: 16/9;
+            height: 100%;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Para que se vea toda la imagen sin recortes */
+            background: #000;
+        }
+
+        .cam-tag {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: white;
+            z-index: 10;
+        }
+
+        #btn-volver {
+            background: var(--danger);
+            padding: 10px 25px;
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="setup-menu">
+        <h1>Mis cámaras locales</h1>
+        <div class="window">
+            <div class="window-header">Cámaras a observar</div>
+            <div class="btn-grid">
+                <button onclick="selectCount(1)" id="b1">1</button>
+                <button onclick="selectCount(2)" id="b2">2</button>
+                <button onclick="selectCount(3)" id="b3">3</button>
+                <button onclick="selectCount(4)" id="b4">4</button>
+            </div>
+            <button id="observar-btn" onclick="startViewing()">Observar</button>
+        </div>
+
+        <div class="window">
+            <div class="window-header">Activas</div>
+            <ul id="cam-list"><li>Detectando dispositivos...</li></ul>
+        </div>
+    </div>
+
+    <div id="visor-container">
+        <div id="live-grid" class="cam-grid"></div>
+        <button id="btn-volver" onclick="stopViewing()">Volver al menú</button>
+    </div>
+
+    <script>
+        let selectedCount = 1;
+        let videoDevices = [];
+        let activeStreams = [];
+
+        async function init() {
+            try {
+                // Pedir permiso inicial
+                const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // Detener el stream inicial de inmediato para no dejar la luz encendida
+                initialStream.getTracks().forEach(track => track.stop());
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                const listEl = document.getElementById('cam-list');
+                listEl.innerHTML = '';
+
+                if (videoDevices.length === 0) {
+                    listEl.innerHTML = '<li>No se detectaron cámaras.</li>';
+                } else {
+                    videoDevices.forEach((device, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = device.label || `Cámara ${index + 1}`;
+                        listEl.appendChild(li);
+                    });
+                }
+                selectCount(1);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('cam-list').innerHTML = '<li>Error: Se requiere permiso de cámara.</li>';
+            }
+        }
+
+        function selectCount(n) {
+            selectedCount = n;
+            for(let i=1; i<=4; i++) {
+                const btn = document.getElementById('b'+i);
+                if(btn) btn.classList.toggle('active', i === n);
+            }
+        }
+
+        async function startViewing() {
+            const grid = document.getElementById('live-grid');
+            grid.innerHTML = '';
+            
+            // Ajuste dinámico de columnas y filas para evitar scroll
+            if (selectedCount === 1) {
+                grid.style.gridTemplateColumns = '1fr';
+            } else if (selectedCount === 2) {
+                grid.style.gridTemplateColumns = '1fr 1fr';
+            } else {
+                grid.style.gridTemplateColumns = '1fr 1fr';
+            }
+
+            document.getElementById('setup-menu').classList.add('hidden');
+            document.getElementById('visor-container').style.display = 'flex';
+
+            for (let i = 0; i < selectedCount; i++) {
+                if (!videoDevices[i]) break;
+
+                const box = document.createElement('div');
+                box.className = 'video-box';
+                
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsInline = true;
+                video.muted = true; // Muy importante para que el navegador permita el autoplay
+                
+                const tag = document.createElement('div');
+                tag.className = 'cam-tag';
+                tag.textContent = videoDevices[i].label || `Cámara ${i+1}`;
+
+                box.appendChild(video);
+                box.appendChild(tag);
+                grid.appendChild(box);
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            deviceId: { exact: videoDevices[i].deviceId },
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    });
+                    video.srcObject = stream;
+                    activeStreams.push(stream);
+                    
+                    // Forzar el play por si acaso
+                    video.onloadedmetadata = () => video.play();
+                    
+                } catch (e) {
+                    console.error("Error al conectar con " + videoDevices[i].label, e);
+                    box.innerHTML = `<div style="padding:20px; text-align:center; font-size:0.7rem; color:gray;">Error al cargar cámara: ${videoDevices[i].label}</div>`;
+                }
+            }
+        }
+
+        function stopViewing() {
+            activeStreams.forEach(s => s.getTracks().forEach(t => t.stop()));
+            activeStreams = [];
+            document.getElementById('visor-container').style.display = 'none';
+            document.getElementById('setup-menu').classList.remove('hidden');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
