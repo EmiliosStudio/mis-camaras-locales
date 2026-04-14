@@ -1,300 +1,801 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Cámaras Locales</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --danger: #ef4444;
-            --selected: #22c55e;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis cámaras locales</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #273348;
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent-dim: rgba(56,189,248,0.15);
+    --accent-hover: #7dd3fc;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --success: #34d399;
+    --error: #f87171;
+    --error-bg: rgba(248,113,113,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+  }
 
-        h1 {
-            font-size: 2.5rem;
-            margin: 20px 0;
-            font-weight: 800;
-            text-align: center;
-            background: linear-gradient(to right, var(--accent), #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
 
-        .window {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
 
-        .window-header {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--accent);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-        }
+  /* ── CONFIG SCREEN ── */
+  #config-screen {
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+  }
 
-        /* Lista de cámaras */
-        ul { list-style: none; padding: 0; margin: 0; }
-        .cam-item {
-            padding: 12px;
-            background: #334155;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 2px solid transparent;
-            color: var(--text-dim);
-        }
-        .cam-item:hover {
-            background: #475569;
-            color: white;
-        }
-        .cam-item.selected {
-            border-color: var(--selected);
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--selected);
-        }
-        .cam-item::before {
-            content: "📷";
-            font-size: 1rem;
-        }
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 10px;
+  }
 
-        #observar-btn {
-            width: 100%;
-            background: var(--accent);
-            color: var(--bg);
-            font-size: 1.1rem;
-            font-weight: bold;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: transform 0.2s, background 0.2s;
-        }
-        #observar-btn:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-        #observar-btn:disabled {
-            background: #475569;
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.6;
-        }
+  .config-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) {
+    .config-wrapper { grid-template-columns: 1fr; }
+  }
 
-        .helper-text {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            font-style: italic;
-        }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
 
-        /* CONTENEDOR DE CÁMARA CENTRADO */
-        #visor-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--bg);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
+  /* Grid selector */
+  .grid-selector {
+    display: flex;
+    gap: 8px;
+  }
+  .grid-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 64px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .grid-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .grid-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .grid-btn .grid-icon {
+    display: grid;
+    gap: 3px;
+    pointer-events: none;
+  }
+  .grid-btn .grid-dot {
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .grid-btn .btn-label {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    opacity: 0.6;
+  }
 
-        .video-wrapper {
-            position: relative;
-            display: inline-block; /* Importante para que el borde se ajuste al video */
-            line-height: 0; /* Elimina espacio extra debajo del video */
-            border: 6px solid var(--accent);
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
-            max-width: 90%;
-            max-height: 75vh;
-        }
+  /* Device list */
+  .device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 80px;
+  }
+  .device-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .device-item:hover { border-color: var(--accent); }
+  .device-item.selected {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+  }
+  .device-item .check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .device-item.selected .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .device-item.selected .check::after {
+    content: '';
+    width: 5px; height: 9px;
+    border: 2px solid var(--bg);
+    border-top: none; border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+    display: block;
+  }
+  .device-name {
+    font-size: 13px;
+    color: var(--text);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .device-idx {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    background: var(--surface);
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
 
-        video {
-            max-width: 100%;
-            max-height: 75vh;
-            width: auto;
-            height: auto;
-            border-radius: 6px;
-            background: #000;
-        }
+  .no-devices {
+    color: var(--text-dim);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-xs);
+  }
 
-        .cam-label {
-            position: absolute;
-            top: -35px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent);
-            color: var(--bg);
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
+  /* Action area */
+  .action-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 720px;
+  }
 
-        #btn-volver {
-            margin-top: 30px;
-            background: var(--danger);
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+  .btn-watch {
+    width: 100%;
+    max-width: 320px;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+  }
+  .btn-watch:disabled {
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: not-allowed;
+    border: 1px solid var(--border);
+  }
+  .btn-watch:not(:disabled):hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(56,189,248,0.25);
+  }
+  .btn-watch:not(:disabled):active { transform: translateY(0); }
 
-        .hidden { display: none !important; }
-    </style>
+  .hint {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+  .hint span { color: var(--accent); font-weight: 600; }
+
+  .permission-msg {
+    font-size: 13px;
+    color: var(--error);
+    text-align: center;
+    padding: 10px 16px;
+    background: var(--error-bg);
+    border-radius: var(--radius-xs);
+    border: 1px solid rgba(248,113,113,0.2);
+    max-width: 480px;
+  }
+
+  /* ── VIEWER SCREEN ── */
+  #viewer-screen {
+    flex-direction: column;
+    background: #080f1e;
+    min-height: 100vh;
+  }
+
+  .viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(15,23,42,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .viewer-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .viewer-title span { color: var(--accent); }
+
+  .btn-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-back:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-back svg { width: 14px; height: 14px; }
+
+  .viewer-grid-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: auto;
+  }
+
+  .cam-grid {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-items: center;
+  }
+  .cam-grid.count-1 { grid-template-columns: 1fr; max-width: 1200px; }
+  .cam-grid.count-2 { grid-template-columns: repeat(2, 1fr); max-width: 1200px; }
+  .cam-grid.count-3 { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
+  .cam-grid.count-4 { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
+
+  /* Camera cell */
+  .cam-cell {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .cam-cell.count-1 { aspect-ratio: 16/9; max-height: calc(100vh - 120px); }
+  .cam-cell.count-2 { aspect-ratio: 16/9; }
+  .cam-cell.count-3 { aspect-ratio: 16/9; }
+  .cam-cell.count-3:last-child { grid-column: 1 / -1; max-width: 50%; }
+  .cam-cell.count-4 { aspect-ratio: 16/9; }
+
+  .cam-cell video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #000;
+  }
+
+  .cam-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .cam-label-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px;
+    background: rgba(15,23,42,0.82);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 20px;
+    max-width: 100%;
+  }
+  .cam-label-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .cam-label-text {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Error overlay */
+  .cam-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    background: rgba(8,15,30,0.95);
+  }
+  .cam-error-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--error-bg);
+    border: 1.5px solid rgba(248,113,113,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--error);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .cam-error h3 {
+    font-size: 14px;
+    color: var(--error);
+    font-weight: 600;
+    text-align: center;
+  }
+  .cam-error p {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 200px;
+    line-height: 1.5;
+  }
+
+  /* Loading overlay */
+  .cam-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8,15,30,0.8);
+  }
+  .cam-spinner {
+    width: 32px; height: 32px;
+    border: 2.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
 </head>
 <body>
 
-    <div id="setup-menu">
-        <h1>Mis cámaras locales</h1>
-        
-        <div class="window">
-            <div class="window-header">Cámaras a observar</div>
-            <button id="observar-btn" onclick="startViewing()" disabled>Observar</button>
-            <div class="helper-text">Selecciona la cámara que quieres observar</div>
-        </div>
+<!-- ── CONFIG SCREEN ── -->
+<div id="config-screen" class="screen active">
+  <div class="hero">
+    <h1>Mis cámaras locales</h1>
+    <p>Selecciona y observa tus dispositivos de video USB en tiempo real</p>
+  </div>
 
-        <div class="window">
-            <div class="window-header">Activas</div>
-            <ul id="cam-list">
-                <li>Detectando dispositivos...</li>
-            </ul>
-        </div>
+  <div class="config-wrapper">
+    <!-- Panel izquierdo: selector de cuadrícula -->
+    <div class="panel">
+      <div class="panel-title">Configuración de Vista</div>
+      <div class="grid-selector" id="grid-selector">
+        <button class="grid-btn active" data-count="1" title="1 cámara">
+          <span class="grid-icon" style="display:grid; grid-template-columns:1fr;">
+            <span class="grid-dot"></span>
+          </span>
+          <span class="btn-label">1</span>
+        </button>
+        <button class="grid-btn" data-count="2" title="2 cámaras">
+          <span class="grid-icon" style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">
+            <span class="grid-dot"></span><span class="grid-dot"></span>
+          </span>
+          <span class="btn-label">2</span>
+        </button>
+        <button class="grid-btn" data-count="3" title="3 cámaras">
+          <span class="grid-icon" style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">
+            <span class="grid-dot"></span><span class="grid-dot"></span>
+            <span class="grid-dot"></span><span class="grid-dot" style="opacity:0;pointer-events:none"></span>
+          </span>
+          <span class="btn-label">3</span>
+        </button>
+        <button class="grid-btn" data-count="4" title="4 cámaras">
+          <span class="grid-icon" style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">
+            <span class="grid-dot"></span><span class="grid-dot"></span>
+            <span class="grid-dot"></span><span class="grid-dot"></span>
+          </span>
+          <span class="btn-label">4</span>
+        </button>
+      </div>
     </div>
 
-    <div id="visor-container">
-        <div class="video-wrapper">
-            <div id="cam-name-tag" class="cam-label">Cámara</div>
-            <video id="main-video" autoplay playsinline muted></video>
-        </div>
-        <button id="btn-volver" onclick="stopViewing()">Volver a la selección de cámaras</button>
+    <!-- Panel derecho: lista de dispositivos -->
+    <div class="panel">
+      <div class="panel-title">Activas</div>
+      <div class="device-list" id="device-list">
+        <div class="no-devices" id="device-placeholder">Cargando dispositivos…</div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        let videoDevices = [];
-        let selectedDeviceId = null;
-        let selectedLabel = "";
-        let activeStream = null;
+  <div class="action-area">
+    <div id="permission-error" class="permission-msg" style="display:none"></div>
+    <button class="btn-watch" id="btn-watch" disabled>Observar</button>
+    <p class="hint" id="hint-text">Selecciona las cámaras que quieres observar</p>
+  </div>
+</div>
 
-        async function init() {
-            try {
-                // Pedir permiso para listar nombres
-                const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                initialStream.getTracks().forEach(track => track.stop());
+<!-- ── VIEWER SCREEN ── -->
+<div id="viewer-screen" class="screen">
+  <div class="viewer-bar">
+    <div class="viewer-title">En vivo — <span id="viewer-count-label">0 cámaras</span></div>
+    <button class="btn-back" id="btn-back">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M10 12L6 8l4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Volver
+    </button>
+  </div>
+  <div class="viewer-grid-container">
+    <div class="cam-grid" id="cam-grid"></div>
+  </div>
+</div>
 
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                videoDevices = devices.filter(d => d.kind === 'videoinput');
-                
-                renderList();
-            } catch (err) {
-                document.getElementById('cam-list').innerHTML = '<li>Error: Se requieren permisos de cámara.</li>';
-            }
+<script>
+  const state = {
+    devices: [],
+    selectedCount: 1,
+    selectedDevices: [],
+    activeStreams: [],
+  };
+
+  const configScreen  = document.getElementById('config-screen');
+  const viewerScreen  = document.getElementById('viewer-screen');
+  const deviceList    = document.getElementById('device-list');
+  const gridSelector  = document.getElementById('grid-selector');
+  const btnWatch      = document.getElementById('btn-watch');
+  const btnBack       = document.getElementById('btn-back');
+  const hintText      = document.getElementById('hint-text');
+  const camGrid       = document.getElementById('cam-grid');
+  const viewerLabel   = document.getElementById('viewer-count-label');
+  const permErr       = document.getElementById('permission-error');
+
+  /* ── INIT ── */
+  async function init() {
+    try {
+      // Pedir permiso inicial para poder enumerar con etiquetas
+      const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      tempStream.getTracks().forEach(t => t.stop());
+      permErr.style.display = 'none';
+    } catch (e) {
+      showPermissionError(e);
+      return;
+    }
+    await refreshDevices();
+    navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
+  }
+
+  function showPermissionError(e) {
+    let msg = 'No se pudo acceder a la cámara.';
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError')
+      msg = 'Permiso denegado. Habilita el acceso a la cámara en la configuración del navegador y recarga la página.';
+    else if (e.name === 'NotFoundError')
+      msg = 'No se detectó ninguna cámara. Conecta un dispositivo de video USB e intenta de nuevo.';
+    permErr.textContent = msg;
+    permErr.style.display = 'block';
+    deviceList.innerHTML = '<div class="no-devices">Sin acceso a dispositivos</div>';
+  }
+
+  async function refreshDevices() {
+    const all = await navigator.mediaDevices.enumerateDevices();
+    state.devices = all.filter(d => d.kind === 'videoinput');
+
+    // Limpiar selección de dispositivos que ya no existen
+    state.selectedDevices = state.selectedDevices.filter(id =>
+      state.devices.some(d => d.deviceId === id)
+    );
+
+    renderDeviceList();
+    updateWatchButton();
+  }
+
+  /* ── RENDER DEVICE LIST ── */
+  function renderDeviceList() {
+    if (state.devices.length === 0) {
+      deviceList.innerHTML = '<div class="no-devices">No se encontraron cámaras</div>';
+      return;
+    }
+    deviceList.innerHTML = '';
+    state.devices.forEach((dev, idx) => {
+      const label = dev.label || `Cámara ${idx + 1}`;
+      const isSelected = state.selectedDevices.includes(dev.deviceId);
+      const item = document.createElement('div');
+      item.className = 'device-item' + (isSelected ? ' selected' : '');
+      item.dataset.id = dev.deviceId;
+      item.innerHTML = `
+        <div class="check"></div>
+        <span class="device-name" title="${label}">${label}</span>
+        <span class="device-idx">#${idx + 1}</span>
+      `;
+      item.addEventListener('click', () => toggleDevice(dev.deviceId));
+      deviceList.appendChild(item);
+    });
+  }
+
+  /* ── TOGGLE DEVICE SELECTION ── */
+  function toggleDevice(deviceId) {
+    const idx = state.selectedDevices.indexOf(deviceId);
+    if (idx >= 0) {
+      state.selectedDevices.splice(idx, 1);
+    } else {
+      if (state.selectedDevices.length < state.selectedCount) {
+        state.selectedDevices.push(deviceId);
+      } else {
+        // Reemplazar la más antigua si ya tenemos el máximo
+        state.selectedDevices.shift();
+        state.selectedDevices.push(deviceId);
+      }
+    }
+    renderDeviceList();
+    updateWatchButton();
+  }
+
+  /* ── GRID SELECTOR ── */
+  gridSelector.addEventListener('click', e => {
+    const btn = e.target.closest('.grid-btn');
+    if (!btn) return;
+    const count = parseInt(btn.dataset.count);
+    state.selectedCount = count;
+
+    gridSelector.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Ajustar selección si hay más de las permitidas
+    if (state.selectedDevices.length > count) {
+      state.selectedDevices = state.selectedDevices.slice(-count);
+    }
+    renderDeviceList();
+    updateWatchButton();
+  });
+
+  /* ── UPDATE WATCH BUTTON ── */
+  function updateWatchButton() {
+    const sel = state.selectedDevices.length;
+    const need = state.selectedCount;
+    const ready = sel === need;
+    btnWatch.disabled = !ready;
+
+    if (state.devices.length === 0) {
+      hintText.innerHTML = 'Conecta una cámara USB y recarga la página';
+    } else if (sel < need) {
+      const remaining = need - sel;
+      hintText.innerHTML = `Selecciona <span>${remaining} cámara${remaining > 1 ? 's' : ''} más</span> para continuar`;
+    } else {
+      hintText.innerHTML = `<span>${sel} cámara${sel > 1 ? 's' : ''} lista${sel > 1 ? 's' : ''}</span> — Pulsa Observar`;
+    }
+  }
+
+  /* ── WATCH ── */
+  btnWatch.addEventListener('click', startViewer);
+
+  async function startViewer() {
+    configScreen.classList.remove('active');
+    viewerScreen.classList.add('active');
+
+    const count = state.selectedDevices.length;
+    viewerLabel.textContent = `${count} cámara${count > 1 ? 's' : ''}`;
+
+    camGrid.className = `cam-grid count-${count}`;
+    camGrid.innerHTML = '';
+
+    const cellPromises = state.selectedDevices.map((deviceId, i) =>
+      createCamCell(deviceId, i, count)
+    );
+    await Promise.allSettled(cellPromises);
+  }
+
+  /* ── CREATE CAMERA CELL ── */
+  async function createCamCell(deviceId, index, totalCount) {
+    const dev = state.devices.find(d => d.deviceId === deviceId);
+    const label = dev ? (dev.label || `Cámara ${index + 1}`) : `Cámara ${index + 1}`;
+
+    const cell = document.createElement('div');
+    cell.className = `cam-cell count-${totalCount}`;
+
+    // Loading state
+    cell.innerHTML = `<div class="cam-loading"><div class="cam-spinner"></div></div>`;
+    camGrid.appendChild(cell);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false
+      });
+      state.activeStreams.push(stream);
+
+      const video = document.createElement('video');
+      video.autoplay = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.srcObject = stream;
+
+      // Ajustar aspect-ratio al stream real
+      video.addEventListener('loadedmetadata', () => {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        if (w && h) {
+          cell.style.aspectRatio = `${w}/${h}`;
         }
+      }, { once: true });
 
-        function renderList() {
-            const listEl = document.getElementById('cam-list');
-            listEl.innerHTML = '';
+      cell.innerHTML = '';
+      cell.appendChild(video);
 
-            if (videoDevices.length === 0) {
-                listEl.innerHTML = '<li>No se detectaron cámaras.</li>';
-                return;
-            }
+      // Label
+      const labelEl = document.createElement('div');
+      labelEl.className = 'cam-label';
+      labelEl.innerHTML = `
+        <div class="cam-label-inner">
+          <div class="cam-label-dot"></div>
+          <span class="cam-label-text">${escapeHtml(label)}</span>
+        </div>
+      `;
+      cell.appendChild(labelEl);
 
-            videoDevices.forEach((device, index) => {
-                const li = document.createElement('li');
-                li.className = 'cam-item';
-                li.textContent = device.label || `Cámara ${index + 1}`;
-                li.onclick = () => selectCamera(device.deviceId, li.textContent);
-                listEl.appendChild(li);
-            });
-        }
+      await video.play().catch(() => {});
 
-        function selectCamera(id, label) {
-            selectedDeviceId = id;
-            selectedLabel = label;
-            
-            // UI Feedback
-            document.querySelectorAll('.cam-item').forEach(el => {
-                el.classList.toggle('selected', el.textContent === label);
-            });
-            
-            document.getElementById('observar-btn').disabled = false;
-        }
+    } catch (err) {
+      let errorMsg = 'No se pudo iniciar la cámara.';
+      let errorDetail = 'Intenta desconectarla y volver a conectarla.';
 
-        async function startViewing() {
-            if (!selectedDeviceId) return;
+      if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMsg = 'Cámara en uso';
+        errorDetail = 'Otro programa tiene esta cámara ocupada. Ciérralo e intenta de nuevo.';
+      } else if (err.name === 'NotAllowedError') {
+        errorMsg = 'Permiso denegado';
+        errorDetail = 'Habilita el acceso en la configuración del navegador.';
+      } else if (err.name === 'NotFoundError') {
+        errorMsg = 'Dispositivo no encontrado';
+        errorDetail = 'La cámara se desconectó o no está disponible.';
+      }
 
-            const video = document.getElementById('main-video');
-            document.getElementById('cam-name-tag').textContent = selectedLabel;
+      cell.innerHTML = `
+        <div class="cam-error">
+          <div class="cam-error-icon">!</div>
+          <h3>${errorMsg}</h3>
+          <p>${errorDetail}</p>
+          <p style="font-size:11px;margin-top:4px;color:var(--text-dim);">${escapeHtml(label)}</p>
+        </div>
+      `;
+    }
+  }
 
-            try {
-                activeStream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: selectedDeviceId } }
-                });
-                
-                video.srcObject = activeStream;
-                
-                document.getElementById('setup-menu').classList.add('hidden');
-                document.getElementById('visor-container').style.display = 'flex';
-                
-                video.onloadedmetadata = () => video.play();
-                
-            } catch (e) {
-                alert("No se pudo acceder a la cámara seleccionada.");
-                console.error(e);
-            }
-        }
+  /* ── BACK ── */
+  btnBack.addEventListener('click', stopViewer);
 
-        function stopViewing() {
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('visor-container').style.display = 'none';
-            document.getElementById('setup-menu').classList.remove('hidden');
-        }
+  function stopViewer() {
+    // Liberar todos los MediaStreamTracks → apaga LEDs
+    state.activeStreams.forEach(stream => {
+      stream.getTracks().forEach(track => track.stop());
+    });
+    state.activeStreams = [];
 
-        window.onload = init;
-    </script>
+    // Limpiar el grid
+    camGrid.innerHTML = '';
+
+    viewerScreen.classList.remove('active');
+    configScreen.classList.add('active');
+  }
+
+  /* ── UTILS ── */
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── START ── */
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    permErr.textContent = 'Tu navegador no soporta acceso a cámaras (WebRTC). Prueba Chrome, Firefox o Edge en una página HTTPS.';
+    permErr.style.display = 'block';
+  } else {
+    init();
+  }
+</script>
 </body>
 </html>
