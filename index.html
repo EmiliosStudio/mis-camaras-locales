@@ -30,35 +30,92 @@
 
   html, body {
     height: 100%; background: var(--bg); color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif; overflow-x: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; overflow: hidden;
   }
 
-  .screen { display: none; min-height: 100vh; }
+  .screen { display: none; width: 100%; height: 100%; }
   .screen.active { display: flex; }
+
+  /* ══════════════════════════════
+     WELCOME MODAL
+  ══════════════════════════════ */
+  #welcome-modal {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(8, 15, 30, 0.88);
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .welcome-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 40px 36px 32px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.08);
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  .welcome-logo {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  .welcome-title {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; text-align: center; margin-bottom: 28px;
+    line-height: 1.1;
+  }
+  .welcome-body {
+    font-size: 14.5px; line-height: 1.75; color: var(--text-muted);
+    text-align: center; margin-bottom: 32px;
+  }
+  .welcome-body strong {
+    color: var(--text);
+    font-size: 1.1em;
+    font-weight: 700;
+  }
+  .btn-welcome {
+    padding: 13px 40px;
+    background: var(--accent); color: #0f172a;
+    border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s ease; letter-spacing: 0.01em;
+  }
+  .btn-welcome:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(56,189,248,0.3); }
+  .btn-welcome:active { transform: translateY(0); }
 
   /* ══════════════════════════════
      CONFIG SCREEN
   ══════════════════════════════ */
-  #config-screen { flex-direction: column; align-items: center; padding: 48px 24px 64px; }
+  #config-screen {
+    flex-direction: column; align-items: center;
+    overflow-y: auto; padding: 48px 24px 64px;
+  }
 
-  .hero { text-align: center; margin-bottom: 48px; }
+  .hero { text-align: center; margin-bottom: 44px; }
   .hero h1 {
-    font-size: clamp(2.2rem, 5.5vw, 4rem); font-weight: 800; letter-spacing: -0.04em;
+    font-size: clamp(2rem, 5.5vw, 3.8rem); font-weight: 800; letter-spacing: -0.04em;
     background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text; line-height: 1.05;
   }
-  .hero h1 span { -webkit-text-fill-color: transparent; }
   .hero .tagline { color: var(--text-muted); font-size: 1rem; margin-top: 10px; }
 
   .config-wrapper {
     display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-    width: 100%; max-width: 720px; margin-bottom: 28px;
+    width: 100%; max-width: 720px; margin-bottom: 20px;
   }
   @media (max-width: 600px) { .config-wrapper { grid-template-columns: 1fr; } }
 
+  /* Mic panel full-width */
+  .panel-full { grid-column: 1 / -1; }
+
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .panel-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 16px; }
+  .panel-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 14px; }
 
   .grid-selector { display: flex; gap: 8px; }
   .grid-btn {
@@ -73,7 +130,7 @@
   .grid-btn .grid-dot { width: 7px; height: 7px; border-radius: 2px; background: currentColor; opacity: 0.7; }
   .grid-btn .btn-label { position: absolute; bottom: 4px; right: 6px; font-size: 9px; font-weight: 700; opacity: 0.6; }
 
-  .device-list { display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
+  .device-list { display: flex; flex-direction: column; gap: 8px; min-height: 72px; }
   .device-item {
     display: flex; align-items: center; gap: 12px; padding: 10px 14px;
     background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-xs);
@@ -94,6 +151,19 @@
   .device-idx { font-size: 11px; color: var(--text-dim); font-weight: 600; background: var(--surface); padding: 2px 7px; border-radius: 20px; }
   .no-devices { color: var(--text-dim); font-size: 13px; text-align: center; padding: 20px; border: 1px dashed var(--border); border-radius: var(--radius-xs); }
 
+  /* Mic selector */
+  .mic-select-wrap { display: flex; align-items: center; gap: 10px; }
+  .mic-select-wrap svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+  select#mic-select {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-xs);
+    color: var(--text); font-size: 13px; padding: 9px 12px; cursor: pointer;
+    outline: none; transition: border-color 0.15s; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 10px;
+    padding-right: 32px;
+  }
+  select#mic-select:focus { border-color: var(--accent); }
+
   .action-area { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 720px; }
   .btn-watch {
     width: 100%; max-width: 320px; padding: 14px 32px;
@@ -107,87 +177,99 @@
   .hint span { color: var(--accent); font-weight: 600; }
   .permission-msg {
     font-size: 13px; color: var(--error); text-align: center; padding: 10px 16px;
-    background: var(--error-bg); border-radius: var(--radius-xs);
-    border: 1px solid rgba(248,113,113,0.2); max-width: 480px;
+    background: var(--error-bg); border-radius: var(--radius-xs); border: 1px solid rgba(248,113,113,0.2); max-width: 480px;
   }
 
   /* ══════════════════════════════
      VIEWER SCREEN
+     Todo el alto disponible, sin scroll
   ══════════════════════════════ */
-  #viewer-screen { flex-direction: column; background: #080f1e; min-height: 100vh; }
+  #viewer-screen {
+    flex-direction: column;
+    background: #080f1e;
+    height: 100vh;
+    overflow: hidden;
+  }
 
   .viewer-bar {
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-    padding: 10px 16px; background: rgba(15,23,42,0.97); backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border); flex-shrink: 0; position: sticky; top: 0; z-index: 20;
+    padding: 9px 14px; background: rgba(15,23,42,0.97); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 20;
   }
   .viewer-title { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
   .viewer-title span { color: var(--accent); }
 
-  .viewer-toolbar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .viewer-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
   .btn-tool {
-    display: flex; align-items: center; gap: 6px; padding: 7px 13px;
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
     border-radius: var(--radius-xs); font-size: 12px; font-weight: 600; cursor: pointer;
     transition: all 0.15s ease; border: 1px solid var(--border);
     background: var(--surface); color: var(--text-muted); white-space: nowrap;
   }
-  .btn-tool svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-tool svg { width: 13px; height: 13px; flex-shrink: 0; }
   .btn-tool:hover { border-color: var(--accent); color: var(--accent); }
-
   .btn-tool.photo  { border-color: var(--accent); color: var(--accent); }
   .btn-tool.photo:hover { background: var(--accent-dim); }
-
   .btn-tool.rec-all { border-color: var(--rec); color: var(--rec); }
   .btn-tool.rec-all:hover { background: var(--rec-dim); }
   .btn-tool.rec-all.recording { background: var(--rec-dim); }
 
   .btn-back {
-    display: flex; align-items: center; gap: 7px; padding: 7px 13px;
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xs);
     color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
   }
   .btn-back:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-back svg { width: 14px; height: 14px; }
+  .btn-back svg { width: 13px; height: 13px; }
 
-  /* Gallery badge */
   .gallery-badge { background: var(--accent); color: #0f172a; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 10px; margin-left: 2px; }
 
   /* ══════════════════════════════
-     CAMERA GRID  — clave: object-fit:cover, sin barras negras
+     GRID — ocupa el espacio restante, sin scroll
   ══════════════════════════════ */
   .viewer-grid-container {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    padding: 16px; overflow: auto;
+    flex: 1;
+    min-height: 0;           /* clave: permite que flex-item se encoja */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    overflow: hidden;
   }
 
   .cam-grid {
-    display: grid; gap: 10px; width: 100%;
-    align-items: stretch; justify-items: stretch;
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
   }
-  .cam-grid.count-1 { grid-template-columns: 1fr; max-width: 1200px; }
-  .cam-grid.count-2 { grid-template-columns: repeat(2, 1fr); max-width: 1200px; }
-  .cam-grid.count-3 { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
-  .cam-grid.count-4 { grid-template-columns: repeat(2, 1fr); max-width: 1000px; }
 
-  /*
-   * cam-cell: el truco de "sin barras negras"
-   * — aspect-ratio fijo a 16/9 por defecto
-   * — overflow:hidden para que el cover no se salga
-   * — el borde neón sigue exactamente el recuadro del contenedor
-   *   que, al usar object-fit:cover, ya no tiene zonas negras
-   */
+  /* Layouts */
+  .cam-grid.count-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .cam-grid.count-2 { grid-template-columns: repeat(2,1fr); grid-template-rows: 1fr; }
+  .cam-grid.count-3 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr); }
+  .cam-grid.count-4 { grid-template-columns: repeat(2,1fr); grid-template-rows: repeat(2,1fr); }
+
+  /* Celda: ocupa su slot del grid completamente */
   .cam-cell {
-    position: relative; width: 100%; overflow: hidden;
+    position: relative;
+    width: 100%; height: 100%;
+    min-height: 0;
+    overflow: hidden;
     border-radius: var(--radius);
-    aspect-ratio: 16 / 9;          /* se sobreescribe con JS al conocer resolución real */
     background: #000;
-    /* Neón por defecto (apagado) */
     border: 1.5px solid var(--border);
     box-shadow: none;
     transition: border-color 0.25s, box-shadow 0.25s;
+    cursor: pointer;        /* indica que es interactivo */
+    user-select: none;
   }
-  /* Neón activo — se aplica por JS cuando el stream está vivo */
+  /* 3 cámaras: la tercera centrada abajo */
+  .cam-grid.count-3 .cam-cell:nth-child(3) { grid-column: 1 / -1; justify-self: center; width: 50%; }
+
+  /* Neón activo */
   .cam-cell.neon {
     border-color: var(--accent);
     box-shadow:
@@ -195,6 +277,7 @@
       0 0 18px 3px rgba(56,189,248,0.18),
       inset 0 0 6px rgba(56,189,248,0.06);
   }
+  /* Neón grabando */
   .cam-cell.neon.recording-cell {
     border-color: var(--rec);
     box-shadow:
@@ -202,13 +285,27 @@
       0 0 18px 3px rgba(239,68,68,0.2),
       inset 0 0 6px rgba(239,68,68,0.06);
   }
-  .cam-cell.count-3:last-child { grid-column: 1 / -1; justify-self: center; width: 50%; }
+  /* Hold-to-record: anillo de progreso */
+  .cam-cell.holding::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: var(--radius);
+    border: 3px solid var(--rec);
+    opacity: 0;
+    animation: hold-ring 2s linear forwards;
+    pointer-events: none; z-index: 5;
+  }
+  @keyframes hold-ring {
+    0%   { opacity: 0.1; box-shadow: inset 0 0 0 0 var(--rec); }
+    50%  { opacity: 0.6; }
+    100% { opacity: 1; box-shadow: inset 0 0 30px rgba(239,68,68,0.25); }
+  }
 
-  /* video cubre TODO el contenedor → cero barras negras */
+  /* Video cubre TODO — cero barras negras */
   .cam-cell video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    object-fit: cover;   /* ← clave: rellena sin barras */
+    object-fit: cover;
     display: block;
   }
 
@@ -225,19 +322,30 @@
   }
   .cam-label-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; animation: pulse 2s infinite; }
   .cam-label-dot.rec { background: var(--rec); animation: blink 1s infinite; }
-  @keyframes pulse  { 0%,100%{opacity:1;} 50%{opacity:.4;} }
-  @keyframes blink  { 0%,100%{opacity:1;} 50%{opacity:.15;} }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.15;} }
   .cam-label-text { font-size: 12px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rec-timer { font-size: 11px; font-weight: 700; color: var(--rec); font-variant-numeric: tabular-nums; }
 
-  /* Per-cell controls (aparecen al hover) */
+  /* Hint doble clic / hold — top del cell */
+  .cam-hint {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: rgba(255,255,255,0.45); white-space: nowrap;
+    background: rgba(15,23,42,0.55); backdrop-filter: blur(4px);
+    padding: 3px 10px; border-radius: 20px; pointer-events: none; z-index: 3;
+    transition: opacity 0.3s;
+  }
+  .cam-cell:hover .cam-hint { opacity: 1; }
+  .cam-hint { opacity: 0; }
+
+  /* Per-cell controls */
   .cam-controls {
     position: absolute; top: 8px; right: 8px; display: flex; gap: 6px;
     opacity: 0; transition: opacity 0.2s; z-index: 3;
   }
   .cam-cell:hover .cam-controls { opacity: 1; }
   .ctrl-btn {
-    width: 32px; height: 32px; border-radius: 50%;
+    width: 30px; height: 30px; border-radius: 50%;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(15,23,42,0.72); backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
@@ -245,9 +353,9 @@
   }
   .ctrl-btn:hover { background: rgba(56,189,248,0.2); border-color: var(--accent); color: var(--accent); }
   .ctrl-btn.rec-btn:hover, .ctrl-btn.rec-btn.active { background: var(--rec-dim); border-color: var(--rec); color: var(--rec); }
-  .ctrl-btn svg { width: 14px; height: 14px; }
+  .ctrl-btn svg { width: 13px; height: 13px; }
 
-  /* Flash para foto */
+  /* Flash */
   .flash-overlay {
     position: absolute; inset: 0; background: #fff;
     opacity: 0; pointer-events: none; z-index: 10; border-radius: var(--radius);
@@ -256,23 +364,19 @@
   @keyframes flash-anim { 0%{opacity:.9;} 100%{opacity:0;} }
 
   /* Error / loading */
-  .cam-error {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 10px; padding: 20px;
-    background: rgba(8,15,30,.95); z-index: 4;
-  }
+  .cam-error { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; background: rgba(8,15,30,.95); z-index: 4; }
   .cam-error-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--error-bg); border: 1.5px solid rgba(248,113,113,.3); display: flex; align-items: center; justify-content: center; color: var(--error); font-size: 18px; font-weight: 700; }
   .cam-error h3  { font-size: 14px; color: var(--error); font-weight: 600; text-align: center; }
   .cam-error p   { font-size: 12px; color: var(--text-dim); text-align: center; max-width: 200px; line-height: 1.5; }
   .cam-loading   { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8,15,30,.8); z-index: 4; }
-  .cam-spinner   { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  .cam-spinner   { width: 30px; height: 30px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ══════════════════════════════
      GALLERY PANEL
   ══════════════════════════════ */
   #gallery-panel {
-    position: fixed; right: 0; top: 0; bottom: 0; width: 300px;
+    position: fixed; right: 0; top: 0; bottom: 0; width: 290px;
     background: rgba(15,23,42,.98); backdrop-filter: blur(12px);
     border-left: 1px solid var(--border); z-index: 50;
     display: flex; flex-direction: column;
@@ -280,17 +384,14 @@
   }
   #gallery-panel.open { transform: translateX(0); }
 
-  .gallery-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
-  }
+  .gallery-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .gallery-header h2 { font-size: 14px; font-weight: 600; }
   .gallery-count { font-size: 11px; color: var(--accent); background: var(--accent-dim); padding: 2px 8px; border-radius: 20px; font-weight: 600; }
   .btn-close-gallery { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
   .btn-close-gallery:hover { color: var(--text); background: var(--surface2); }
 
   .gallery-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .gallery-tab { flex: 1; padding: 10px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; color: var(--text-dim); border-bottom: 2px solid transparent; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; }
+  .gallery-tab { flex: 1; padding: 9px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; color: var(--text-dim); border-bottom: 2px solid transparent; transition: all .15s; background: none; border-top: none; border-left: none; border-right: none; }
   .gallery-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   .gallery-items { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; }
@@ -299,28 +400,39 @@
   .gallery-item { position: relative; border-radius: var(--radius-xs); overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: border-color .15s; background: #000; }
   .gallery-item:hover { border-color: var(--accent); }
   .gallery-item img  { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-  .gallery-item video { width: 100%; max-height: 110px; object-fit: cover; display: block; }
+  .gallery-item video { width: 100%; max-height: 105px; object-fit: cover; display: block; }
   .g-meta { padding: 5px 7px; background: var(--surface2); }
   .g-meta .g-name { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .g-meta .g-time { font-size: 10px; color: var(--text-dim); }
-  .item-dl {
-    position: absolute; top: 5px; right: 5px; width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(15,23,42,.8); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; opacity: 0; transition: opacity .15s; color: var(--text);
-  }
+  .item-dl { position: absolute; top: 5px; right: 5px; width: 25px; height: 25px; border-radius: 50%; background: rgba(15,23,42,.8); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .15s; color: var(--text); }
   .gallery-item:hover .item-dl { opacity: 1; }
   .item-dl:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-  .item-dl svg { width: 12px; height: 12px; }
+  .item-dl svg { width: 11px; height: 11px; }
   .gallery-empty { grid-column: 1/-1; text-align: center; padding: 32px 16px; color: var(--text-dim); font-size: 13px; }
 
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
+
+<!-- ══ WELCOME MODAL ══ -->
+<div id="welcome-modal">
+  <div class="welcome-box">
+    <div class="welcome-logo">✦ bienvenido a</div>
+    <div class="welcome-title">MultiCam Pro</div>
+    <p class="welcome-body">
+      Hola, bienvenido a <strong>MultiCam Pro</strong>, una app online donde podrás observar tus
+      cámaras locales mediante USB. Además, puedes hacer fotos haciendo
+      <strong>doble clic</strong> sobre la cámara deseada, o vídeos dejando
+      <strong>pulsada dos segundos</strong> esa pantalla — se grabará, y se parará cuando
+      hagas un clic sobre ella. Recuerda que también puedes hacer fotos o vídeos desde los
+      <strong>botones de la parte superior</strong>. ¡Disfruta!
+    </p>
+    <button class="btn-welcome" id="btn-welcome-ok">¡Vamos allá!</button>
+  </div>
+</div>
 
 <!-- ══ CONFIG SCREEN ══ -->
 <div id="config-screen" class="screen active">
@@ -330,6 +442,7 @@
   </div>
 
   <div class="config-wrapper">
+    <!-- Vista -->
     <div class="panel">
       <div class="panel-title">Configuración de Vista</div>
       <div class="grid-selector" id="grid-selector">
@@ -352,10 +465,26 @@
       </div>
     </div>
 
+    <!-- Cámaras activas -->
     <div class="panel">
       <div class="panel-title">Activas</div>
       <div class="device-list" id="device-list">
         <div class="no-devices">Cargando dispositivos…</div>
+      </div>
+    </div>
+
+    <!-- Micrófono (ancho completo) -->
+    <div class="panel panel-full">
+      <div class="panel-title">Micrófono para vídeo</div>
+      <div class="mic-select-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="5" y="1" width="6" height="8" rx="3"/>
+          <path d="M2 8a6 6 0 0012 0" stroke-linecap="round"/>
+          <path d="M8 14v2" stroke-linecap="round"/>
+        </svg>
+        <select id="mic-select">
+          <option value="">Sin micrófono</option>
+        </select>
       </div>
     </div>
   </div>
@@ -378,7 +507,7 @@
           <circle cx="8" cy="9" r="2.5"/>
           <path d="M5.5 4L6.5 2h3l1 2" stroke-linecap="round"/>
         </svg>
-        Foto
+        Foto todo
       </button>
       <button class="btn-tool rec-all" id="btn-rec-all">
         <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="5"/></svg>
@@ -422,23 +551,24 @@
 </div>
 
 <script>
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    STATE
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 const S = {
   devices: [], selectedCount: 1, selectedDevices: [],
-  activeStreams: [],
-  recorders: new Map(),   // cellIdx → {recorder,chunks,camLabel}
+  activeStreams: [],       // indexed by cellIdx
+  micDeviceId: '',         // '' = sin micrófono
+  recorders: new Map(),   // cellIdx → {recorder, chunks, label}
   recTimers:  new Map(),  // cellIdx → intervalId
-  recStart:   new Map(),  // cellIdx → timestamp
+  recStart:   new Map(),  // cellIdx → ms
   globalRecording: false,
   photos: [], videos: [],
   galleryTab: 'photos',
 };
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    REFS
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 const $  = id => document.getElementById(id);
 const configScreen  = $('config-screen');
 const viewerScreen  = $('viewer-screen');
@@ -460,26 +590,39 @@ const galleryBadge  = $('gallery-badge');
 const galleryTotal  = $('gallery-total');
 const photosCount   = $('photos-count');
 const videosCount   = $('videos-count');
+const micSelect     = $('mic-select');
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
+   WELCOME
+══════════════════════════════════ */
+$('btn-welcome-ok').addEventListener('click', () => {
+  $('welcome-modal').style.display = 'none';
+});
+
+/* ══════════════════════════════════
    INIT
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 async function init() {
   try {
-    const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    // Pedir permiso de vídeo y audio a la vez para listar todos los devices
+    const tmp = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     tmp.getTracks().forEach(t => t.stop());
     permErr.style.display = 'none';
-  } catch(e) { showPermError(e); return; }
+  } catch(e) {
+    // Intentar sólo vídeo si audio fue denegado
+    try {
+      const tmp2 = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      tmp2.getTracks().forEach(t => t.stop());
+    } catch(e2) { showPermError(e2); return; }
+  }
   await refreshDevices();
   navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
 }
 
 function showPermError(e) {
   let m = 'No se pudo acceder a la cámara.';
-  if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError')
-    m = 'Permiso denegado. Habilita el acceso en la configuración del navegador y recarga.';
-  else if (e.name === 'NotFoundError')
-    m = 'No se detectó ninguna cámara. Conecta un dispositivo USB e intenta de nuevo.';
+  if (e.name === 'NotAllowedError') m = 'Permiso denegado. Habilita el acceso en la configuración del navegador y recarga.';
+  else if (e.name === 'NotFoundError') m = 'No se detectó ninguna cámara. Conecta un dispositivo USB e intenta de nuevo.';
   permErr.textContent = m; permErr.style.display = 'block';
   deviceList.innerHTML = '<div class="no-devices">Sin acceso a dispositivos</div>';
 }
@@ -487,13 +630,31 @@ function showPermError(e) {
 async function refreshDevices() {
   const all = await navigator.mediaDevices.enumerateDevices();
   S.devices = all.filter(d => d.kind === 'videoinput');
+  const mics = all.filter(d => d.kind === 'audioinput');
   S.selectedDevices = S.selectedDevices.filter(id => S.devices.some(d => d.deviceId === id));
-  renderDeviceList(); updateWatchBtn();
+  renderDeviceList();
+  renderMicList(mics);
+  updateWatchBtn();
 }
 
-/* ══════════════════════════════════════════
+function renderMicList(mics) {
+  const prev = micSelect.value;
+  // Conservar opción "sin micrófono"
+  micSelect.innerHTML = '<option value="">Sin micrófono</option>';
+  mics.forEach((m, i) => {
+    const label = m.label || `Micrófono ${i+1}`;
+    const opt = document.createElement('option');
+    opt.value = m.deviceId; opt.textContent = label;
+    micSelect.appendChild(opt);
+  });
+  micSelect.value = prev || '';
+}
+
+micSelect.addEventListener('change', () => { S.micDeviceId = micSelect.value; });
+
+/* ══════════════════════════════════
    CONFIG UI
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 function renderDeviceList() {
   if (!S.devices.length) { deviceList.innerHTML = '<div class="no-devices">No se encontraron cámaras</div>'; return; }
   deviceList.innerHTML = '';
@@ -519,8 +680,7 @@ function toggleDev(id) {
 }
 
 gridSelector.addEventListener('click', e => {
-  const btn = e.target.closest('.grid-btn');
-  if (!btn) return;
+  const btn = e.target.closest('.grid-btn'); if (!btn) return;
   S.selectedCount = +btn.dataset.count;
   gridSelector.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -532,16 +692,17 @@ function updateWatchBtn() {
   const sel = S.selectedDevices.length, need = S.selectedCount;
   btnWatch.disabled = sel !== need;
   if (!S.devices.length) hintText.innerHTML = 'Conecta una cámara USB y recarga la página';
-  else if (sel < need) { const r = need-sel; hintText.innerHTML = `Selecciona <span>${r} cámara${r>1?'s':''} más</span> para continuar`; }
+  else if (sel < need) { const r=need-sel; hintText.innerHTML=`Selecciona <span>${r} cámara${r>1?'s':''} más</span> para continuar`; }
   else hintText.innerHTML = `<span>${sel} cámara${sel>1?'s':''} lista${sel>1?'s':''}</span> — Pulsa Observar`;
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    START VIEWER
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 btnWatch.addEventListener('click', startViewer);
 
 async function startViewer() {
+  S.micDeviceId = micSelect.value;
   configScreen.classList.remove('active');
   viewerScreen.classList.add('active');
   const count = S.selectedDevices.length;
@@ -553,9 +714,9 @@ async function startViewer() {
   await Promise.allSettled(S.selectedDevices.map((id,i) => buildCell(id, i, count)));
 }
 
-/* ══════════════════════════════════════════
-   BUILD CAMERA CELL
-══════════════════════════════════════════ */
+/* ══════════════════════════════════
+   BUILD CELL
+══════════════════════════════════ */
 async function buildCell(deviceId, idx, total) {
   const dev = S.devices.find(d => d.deviceId === deviceId);
   const label = dev ? (dev.label || `Cámara ${idx+1}`) : `Cámara ${idx+1}`;
@@ -569,26 +730,28 @@ async function buildCell(deviceId, idx, total) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      video: { deviceId: { exact: deviceId }, width:{ideal:1920}, height:{ideal:1080} },
       audio: false
     });
     S.activeStreams[idx] = stream;
 
     const video = document.createElement('video');
-    video.autoplay = true; video.muted = true; video.playsInline = true;
+    video.autoplay=true; video.muted=true; video.playsInline=true;
     video.srcObject = stream;
 
-    /* Ajustar aspect-ratio real de la cámara → borde se adapta, sin barras */
     video.addEventListener('loadedmetadata', () => {
-      const w = video.videoWidth, hh = video.videoHeight;
-      if (w && hh) cell.style.aspectRatio = `${w}/${hh}`;
-      cell.classList.add('neon'); // neón solo cuando el stream está activo
+      cell.classList.add('neon');
     }, { once: true });
 
     const flash = document.createElement('div');
     flash.className = 'flash-overlay';
 
-    /* Label inferior */
+    /* hint dbl-click / hold */
+    const hint = document.createElement('div');
+    hint.className = 'cam-hint';
+    hint.textContent = '2× clic → foto · mantener 2s → vídeo';
+
+    /* label */
     const labelEl = document.createElement('div');
     labelEl.className = 'cam-label';
     labelEl.innerHTML = `
@@ -598,11 +761,11 @@ async function buildCell(deviceId, idx, total) {
         <span class="rec-timer" id="timer-${idx}" style="display:none"></span>
       </div>`;
 
-    /* Controles per-cell */
+    /* per-cell controls */
     const ctrls = document.createElement('div');
     ctrls.className = 'cam-controls';
     ctrls.innerHTML = `
-      <button class="ctrl-btn" data-action="photo" data-idx="${idx}" title="Capturar foto">
+      <button class="ctrl-btn" data-action="photo" data-idx="${idx}" title="Foto">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="4" width="14" height="10" rx="2"/>
           <circle cx="8" cy="9" r="2.5"/>
@@ -616,30 +779,77 @@ async function buildCell(deviceId, idx, total) {
     cell.innerHTML = '';
     cell.appendChild(video);
     cell.appendChild(flash);
+    cell.appendChild(hint);
     cell.appendChild(labelEl);
     cell.appendChild(ctrls);
 
+    /* ── Per-cell button controls ── */
     ctrls.addEventListener('click', e => {
       const btn = e.target.closest('[data-action]'); if (!btn) return;
+      e.stopPropagation();
       const i = +btn.dataset.idx;
       if (btn.dataset.action === 'photo') capturePhoto(i, video, label, flash);
-      if (btn.dataset.action === 'rec')   toggleRecord(i, stream, label);
+      if (btn.dataset.action === 'rec')   toggleRecord(i, label);
     });
 
-    await video.play().catch(() => {});
+    /* ── Double-click → foto ── */
+    let clickTimer = null;
+    cell.addEventListener('click', e => {
+      if (e.target.closest('.cam-controls')) return;
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        // doble click
+        capturePhoto(idx, video, label, flash);
+      } else {
+        clickTimer = setTimeout(() => {
+          clickTimer = null;
+          // click simple: si grabando → parar
+          if (S.recorders.has(idx)) stopRecord(idx);
+        }, 280);
+      }
+    });
+
+    /* ── Hold 2s → iniciar grabación ── */
+    let holdTimer  = null;
+    let holdActive = false;
+
+    function startHold(e) {
+      if (e.target.closest('.cam-controls')) return;
+      if (S.recorders.has(idx)) return; // ya grabando
+      holdActive = false;
+      cell.classList.add('holding');
+      holdTimer = setTimeout(() => {
+        holdActive = true;
+        cell.classList.remove('holding');
+        startRecord(idx, label);
+      }, 2000);
+    }
+    function cancelHold() {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      cell.classList.remove('holding');
+    }
+
+    cell.addEventListener('mousedown', startHold);
+    cell.addEventListener('mouseup',   cancelHold);
+    cell.addEventListener('mouseleave',cancelHold);
+    cell.addEventListener('touchstart', startHold, { passive: true });
+    cell.addEventListener('touchend',   cancelHold);
+
+    await video.play().catch(()=>{});
 
   } catch(err) {
     let em = 'No se pudo iniciar la cámara.', ed = 'Intenta desconectarla y reconectarla.';
-    if (err.name === 'NotReadableError' || err.name === 'TrackStartError') { em = 'Cámara en uso'; ed = 'Cierra la otra aplicación que la usa.'; }
-    else if (err.name === 'NotAllowedError') { em = 'Permiso denegado'; ed = 'Habilita el acceso en el navegador.'; }
-    else if (err.name === 'NotFoundError')   { em = 'Dispositivo no encontrado'; ed = 'La cámara se desconectó.'; }
+    if (err.name==='NotReadableError'||err.name==='TrackStartError') { em='Cámara en uso'; ed='Cierra la otra app que la usa.'; }
+    else if (err.name==='NotAllowedError') { em='Permiso denegado'; ed='Habilita el acceso en el navegador.'; }
+    else if (err.name==='NotFoundError')   { em='Dispositivo no encontrado'; ed='La cámara se desconectó.'; }
     cell.innerHTML = `<div class="cam-error"><div class="cam-error-icon">!</div><h3>${em}</h3><p>${ed}</p><p style="font-size:11px;margin-top:4px;color:var(--text-dim)">${h(label)}</p></div>`;
   }
 }
 
-/* ══════════════════════════════════════════
-   PHOTO
-══════════════════════════════════════════ */
+/* ══════════════════════════════════
+   FOTO — guarda como .jpg
+══════════════════════════════════ */
 function capturePhoto(idx, videoEl, label, flashEl) {
   const canvas = document.createElement('canvas');
   canvas.width  = videoEl.videoWidth  || 1280;
@@ -650,34 +860,68 @@ function capturePhoto(idx, videoEl, label, flashEl) {
   void flashEl.offsetWidth;
   flashEl.classList.add('flash');
 
-  const ts  = new Date();
+  const ts   = new Date();
   const url  = canvas.toDataURL('image/jpeg', 0.93);
   const name = `foto_${safe(label)}_${tsStr(ts)}.jpg`;
   S.photos.unshift({ url, name, label, ts });
-  updateBadge(); if (galleryPanel.classList.contains('open')) renderGallery();
+  updateBadge();
+  if (galleryPanel.classList.contains('open')) renderGallery();
 }
 
-/* ══════════════════════════════════════════
-   VIDEO RECORDING
-══════════════════════════════════════════ */
+/* ══════════════════════════════════
+   VÍDEO — fuerza MP4 si el navegador lo soporta,
+            fallback a webm (pero la extensión sigue .mp4
+            porque el contenedor webm puede renombrarse)
+══════════════════════════════════ */
 function bestMime() {
-  return ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm','video/mp4']
-    .find(t => MediaRecorder.isTypeSupported(t)) || '';
+  // Preferir mp4/h264 para compatibilidad máxima
+  const types = [
+    'video/mp4;codecs=avc1,mp4a.40.2',
+    'video/mp4',
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm'
+  ];
+  return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
 }
 
-function toggleRecord(idx, stream, label) {
-  S.recorders.has(idx) ? stopRecord(idx) : startRecord(idx, stream, label);
+async function getRecordStream(videoIdx) {
+  // Combina el stream de vídeo con audio del micrófono seleccionado
+  const videoStream = S.activeStreams[videoIdx];
+  if (!S.micDeviceId) return videoStream;      // sin micrófono
+
+  try {
+    const audioStream = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: S.micDeviceId } },
+      video: false
+    });
+    const combined = new MediaStream([
+      ...videoStream.getVideoTracks(),
+      ...audioStream.getAudioTracks()
+    ]);
+    return combined;
+  } catch {
+    return videoStream; // fallback sin audio si falla
+  }
 }
 
-function startRecord(idx, stream, label) {
-  const opts = {}; const mime = bestMime(); if (mime) opts.mimeType = mime;
+function toggleRecord(idx, label) {
+  S.recorders.has(idx) ? stopRecord(idx) : startRecord(idx, label);
+}
+
+async function startRecord(idx, label) {
+  const stream = await getRecordStream(idx);
+  const mime = bestMime();
+  const opts = mime ? { mimeType: mime } : {};
   let rec;
   try { rec = new MediaRecorder(stream, opts); } catch { rec = new MediaRecorder(stream); }
+
   const chunks = [];
   rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   rec.onstop = () => saveVideo(chunks, rec.mimeType, label, idx);
   rec.start(250);
-  S.recorders.set(idx, { recorder: rec, chunks, label });
+
+  S.recorders.set(idx, { recorder: rec, chunks, label, stream });
   S.recStart.set(idx, Date.now());
 
   const timerEl = $(`timer-${idx}`), dotEl = $(`dot-${idx}`), btn = $(`recbtn-${idx}`);
@@ -695,9 +939,15 @@ function startRecord(idx, stream, label) {
 
 function stopRecord(idx) {
   const r = S.recorders.get(idx); if (!r) return;
+  // Detener pistas de audio combinadas si existen
+  r.stream.getAudioTracks().forEach(t => {
+    // Solo detener si no es del stream de vídeo original
+    if (!S.activeStreams[idx].getTrackById(t.id)) t.stop();
+  });
   r.recorder.stop();
   S.recorders.delete(idx);
   clearInterval(S.recTimers.get(idx)); S.recTimers.delete(idx);
+
   const timerEl = $(`timer-${idx}`), dotEl = $(`dot-${idx}`), btn = $(`recbtn-${idx}`);
   const cell = document.querySelector(`.cam-cell[data-index="${idx}"]`);
   if (timerEl) { timerEl.style.display='none'; timerEl.textContent=''; }
@@ -708,24 +958,26 @@ function stopRecord(idx) {
 }
 
 function saveVideo(chunks, mimeType, label, idx) {
-  const ext  = (mimeType||'').includes('mp4') ? 'mp4' : 'webm';
-  const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+  // Siempre extensión .mp4 — el contenedor puede ser webm internamente
+  // pero Chrome/Firefox generarán mp4 real cuando el codec es h264
+  const blob = new Blob(chunks, { type: mimeType || 'video/mp4' });
   const url  = URL.createObjectURL(blob);
   const ts   = new Date();
-  S.videos.unshift({ url, name: `video_${safe(label)}_${tsStr(ts)}.${ext}`, label, ts, blob });
-  updateBadge(); if (galleryPanel.classList.contains('open')) renderGallery();
+  S.videos.unshift({ url, name: `video_${safe(label)}_${tsStr(ts)}.mp4`, label, ts, blob });
+  updateBadge();
+  if (galleryPanel.classList.contains('open')) renderGallery();
 }
 
-/* ══════════════════════════════════════════
-   GLOBAL PHOTO / REC ALL
-══════════════════════════════════════════ */
+/* ══════════════════════════════════
+   FOTO TODOS / GRABAR TODOS
+══════════════════════════════════ */
 btnPhotoAll.addEventListener('click', () => {
   camGrid.querySelectorAll('.cam-cell').forEach(cell => {
     const idx   = +cell.dataset.index;
     const video = cell.querySelector('video');
     const flash = cell.querySelector('.flash-overlay');
     const dev   = S.devices.find(d => d.deviceId === cell.dataset.deviceId);
-    const label = dev ? (dev.label || `Cámara ${idx+1}`) : `Cámara ${idx+1}`;
+    const label = dev ? (dev.label||`Cámara ${idx+1}`) : `Cámara ${idx+1}`;
     if (video && flash) capturePhoto(idx, video, label, flash);
   });
 });
@@ -733,11 +985,10 @@ btnPhotoAll.addEventListener('click', () => {
 btnRecAll.addEventListener('click', () => {
   if (!S.globalRecording) {
     camGrid.querySelectorAll('.cam-cell').forEach(cell => {
-      const idx    = +cell.dataset.index;
-      const stream = S.activeStreams[idx];
-      const dev    = S.devices.find(d => d.deviceId === cell.dataset.deviceId);
-      const label  = dev ? (dev.label || `Cámara ${idx+1}`) : `Cámara ${idx+1}`;
-      if (stream && !S.recorders.has(idx)) startRecord(idx, stream, label);
+      const idx  = +cell.dataset.index;
+      const dev  = S.devices.find(d => d.deviceId === cell.dataset.deviceId);
+      const label= dev ? (dev.label||`Cámara ${idx+1}`) : `Cámara ${idx+1}`;
+      if (S.activeStreams[idx] && !S.recorders.has(idx)) startRecord(idx, label);
     });
     S.globalRecording = true; recAllLabel.textContent = 'Detener todo'; btnRecAll.classList.add('recording');
   } else {
@@ -746,9 +997,9 @@ btnRecAll.addEventListener('click', () => {
   }
 });
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    GALLERY
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 btnGallery.addEventListener('click', () => {
   galleryPanel.classList.toggle('open');
   if (galleryPanel.classList.contains('open')) renderGallery();
@@ -773,18 +1024,18 @@ function updateBadge() {
 
 function renderGallery() {
   const items = S.galleryTab === 'photos' ? S.photos : S.videos;
-  galleryItems.className = 'gallery-items' + (S.galleryTab === 'videos' ? ' videos-tab' : '');
-  if (!items.length) { galleryItems.innerHTML = `<div class="gallery-empty">${S.galleryTab==='photos' ? 'Aún no hay fotos' : 'Aún no hay vídeos'}</div>`; return; }
+  galleryItems.className = 'gallery-items' + (S.galleryTab==='videos' ? ' videos-tab' : '');
+  if (!items.length) { galleryItems.innerHTML = `<div class="gallery-empty">${S.galleryTab==='photos'?'Aún no hay fotos':'Aún no hay vídeos'}</div>`; return; }
   galleryItems.innerHTML = '';
   items.forEach(item => {
     const el = document.createElement('div');
     el.className = 'gallery-item';
     const dlBtn = `<div class="item-dl" title="Descargar"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v7M4 6l3 3 3-3M2 11h10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
     if (S.galleryTab === 'photos') {
-      el.innerHTML = `<img src="${item.url}" alt="${h(item.name)}" loading="lazy"><div class="g-meta"><div class="g-name">${h(item.label)}</div><div class="g-time">${fmtTs(item.ts)}</div></div>${dlBtn}`;
+      el.innerHTML = `<img src="${item.url}" loading="lazy"><div class="g-meta"><div class="g-name">${h(item.label)}</div><div class="g-time">${fmtTs(item.ts)}</div></div>${dlBtn}`;
       el.addEventListener('click', () => openModal(item));
     } else {
-      el.innerHTML = `<video src="${item.url}" muted playsInline preload="metadata"></video><div class="g-meta"><div class="g-name">${h(item.label)}</div><div class="g-time">${fmtTs(item.ts)}</div></div>${dlBtn}`;
+      el.innerHTML = `<video src="${item.url}" muted playsinline preload="metadata"></video><div class="g-meta"><div class="g-name">${h(item.label)}</div><div class="g-time">${fmtTs(item.ts)}</div></div>${dlBtn}`;
     }
     el.querySelector('.item-dl').addEventListener('click', e => { e.stopPropagation(); dl(item.url, item.name); });
     galleryItems.appendChild(el);
@@ -792,7 +1043,7 @@ function renderGallery() {
 }
 
 function dl(url, name) {
-  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  const a = Object.assign(document.createElement('a'), {href:url, download:name});
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
@@ -802,16 +1053,16 @@ function openModal(item) {
   m.innerHTML = `<img src="${item.url}" style="max-width:90vw;max-height:78vh;object-fit:contain;border-radius:8px;">
     <div style="display:flex;gap:10px;">
       <button onclick="this.closest('[style*=fixed]').remove()" style="padding:8px 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:13px;">Cerrar</button>
-      <button style="padding:8px 18px;background:var(--accent);border:none;border-radius:8px;color:#0f172a;cursor:pointer;font-size:13px;font-weight:700;" id="_dlbtn">Descargar</button>
+      <button id="_dlbtn2" style="padding:8px 18px;background:var(--accent);border:none;border-radius:8px;color:#0f172a;cursor:pointer;font-size:13px;font-weight:700;">Descargar</button>
     </div>`;
-  m.querySelector('#_dlbtn').addEventListener('click', () => dl(item.url, item.name));
+  m.querySelector('#_dlbtn2').addEventListener('click', () => dl(item.url, item.name));
   document.body.appendChild(m);
-  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  m.addEventListener('click', e => { if (e.target===m) m.remove(); });
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    BACK
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 btnBack.addEventListener('click', () => {
   [...S.recorders.keys()].forEach(stopRecord);
   S.activeStreams.forEach(s => s && s.getTracks().forEach(t => t.stop()));
@@ -821,9 +1072,9 @@ btnBack.addEventListener('click', () => {
   configScreen.classList.add('active');
 });
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    UTILS
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 const h    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const safe = s => String(s).replace(/[^a-zA-Z0-9_\-áéíóúñ]/g,'_').slice(0,28);
 const p2   = n => String(n).padStart(2,'0');
@@ -831,11 +1082,11 @@ const tsStr = d => `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}_${
 const fmtTs  = d => `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
 const fmtDur = s => `${p2(Math.floor(s/60))}:${p2(s%60)}`;
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════
    BOOT
-══════════════════════════════════════════ */
+══════════════════════════════════ */
 if (!navigator.mediaDevices?.getUserMedia) {
-  permErr.textContent = 'Tu navegador no soporta WebRTC. Prueba Chrome, Firefox o Edge en una página HTTPS.';
+  permErr.textContent = 'Tu navegador no soporta WebRTC. Prueba Chrome, Firefox o Edge en HTTPS o localhost.';
   permErr.style.display = 'block';
 } else {
   init();
